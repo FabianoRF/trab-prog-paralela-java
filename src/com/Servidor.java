@@ -5,8 +5,6 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.channels.FileChannel;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,6 +12,7 @@ import java.util.logging.Logger;
 public class Servidor {
     private ServerSocket serverSocket;
     private Socket socket;
+
 
     public Servidor() {
         try {
@@ -37,21 +36,17 @@ public class Servidor {
         private ObjectOutputStream outputStream; // objeto que será responsável pelo envio de mensagens
         private ObjectInputStream inputStream; // quem recebe as mensagens
 
+        private FileMessage message = new FileMessage();
+
         // criando instancias
         public ListenerSocket(Socket socket) throws IOException{
             this.outputStream = new ObjectOutputStream(socket.getOutputStream());
             this.inputStream = new ObjectInputStream(socket.getInputStream());
         }
 
-        public void writeImage(BufferedImage image) throws IOException{
-            Date date = new Date();
-            String imagePath = "src/imagensConvertidas/imagem-convertida-" + date.toString() + ".png";
 
-            ImageIO.write(image, "PNG", new File(imagePath));
 
-        }
-
-        private void converter(FileMessage message) throws IOException {
+        private BufferedImage converter() throws IOException {
 
             BufferedImage image = ImageIO.read(message.getFile());
 
@@ -69,20 +64,27 @@ public class Servidor {
             quadranteC.run();
             quadranteD.run();
 
-            writeImage(image);
+            return image;
         }
 
         @Override
         public void run() {
             // variavel que representa o arquivo
-            FileMessage message = null;
+            this.message = null;
             
             try {
                 while((message = (FileMessage) inputStream.readObject()) != null ){
                     if (message.getFile() != null) { // se for diferente de null possui uma mensagem
 
-                        // converte a imagem recibida
-                        converter(message);
+                        BufferedImage convertedImage = converter();
+
+                        // salva em um arquivo temporário para poder enviar e depois exclui
+                        File temporario = new File("src/temporario.png");
+                        ImageIO.write(convertedImage, "PNG", temporario);
+
+
+                        this.outputStream.writeObject(new FileMessage(temporario));
+                        temporario.delete();
                     }
                 }
             } catch (IOException ex) {
@@ -91,7 +93,6 @@ public class Servidor {
                 Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-  
     }
 
     public static void main(String[] args) {

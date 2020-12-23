@@ -1,5 +1,6 @@
 package com;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.Serializable;
 
@@ -9,6 +10,10 @@ public class FileMessage implements Serializable{
 
     public FileMessage(String client, File file) {
         this.client = client;
+        this.file = file;
+    }
+
+    public FileMessage(File file) {
         this.file = file;
     }
 
