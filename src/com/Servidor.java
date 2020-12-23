@@ -2,12 +2,10 @@ package com;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.channels.FileChannel;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -95,7 +93,7 @@ public class Servidor {
         }
   
     }
-    
+
     public static void main(String[] args) {
         new Servidor();
     }
